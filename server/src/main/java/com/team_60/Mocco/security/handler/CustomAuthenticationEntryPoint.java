@@ -30,9 +30,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         else if(exception.equals(ExceptionCode.TOKEN_EXPIRED_EXCEPTION.getStatus())) {
             setResponse(response, ExceptionCode.TOKEN_EXPIRED_EXCEPTION);
         }
-//        else {
-//            setResponse(response, ExceptionCode.ACCESS_DENIED);
-//        }
+        else {
+            setResponse(response, ExceptionCode.BAD_REQUEST);
+        }
     }
     //한글 출력을 위해 getWriter() 사용
     private void setResponse(HttpServletResponse response, ExceptionCode exceptionCode) throws IOException {

@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(currentRequest);
         //header에서 JWT 토큰 추출
         String token = getToken((HttpServletRequest) request);
-        try {
+      try {
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 //redis에 해당 accessToken logout 여부 확인
                 String isLogout = (String) redisTemplate.opsForValue().get(token);
@@ -44,26 +44,31 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                 }
             }
             }catch (NullPointerException e){
-                request.setAttribute("exception", ExceptionCode.BAD_REQUEST_TOKEN.getStatus());
-            }catch (SecurityException e) {
-                request.setAttribute("exception", ExceptionCode.FILTER_UNKNOWN_ERROR.getStatus());
+                request.setAttribute("exception", ExceptionCode.BAD_REQUEST_TOKEN.getMessage());
             } catch (TokenExpiredException e) {
-                request.setAttribute("exception", ExceptionCode.TOKEN_EXPIRED_EXCEPTION.getStatus());
+                request.setAttribute("exception", ExceptionCode.TOKEN_EXPIRED_EXCEPTION.getMessage());
             } catch (IllegalArgumentException e) {
-                request.setAttribute("exception", ExceptionCode.NOT_CORRECT_ARGUMENT.getStatus());
-            }
-        //
-//        catch (Exception e) {
-//                log.error("================================================");
-//                log.error("JwtFilter - doFilterInternal() 오류발생");
-//                log.error("token : {}", token);
-//                log.error("Exception Message : {}", e.getMessage());
-//                log.error("Exception StackTrace : {");
-//                e.printStackTrace();
-//                log.error("}");
-//                log.error("================================================");
-//                request.setAttribute("exception", ExceptionCode.FILTER_UNKNOWN_ERROR.getStatus());
-//            }
+                request.setAttribute("exception", ExceptionCode.NOT_CORRECT_ARGUMENT.getMessage());
+            } catch (SecurityException e) {
+            log.error("Exception Message : {}", e.getMessage());
+            log.error("Exception StackTrace : {");
+            e.printStackTrace();
+                request.setAttribute("exception", ExceptionCode.FILTER_UNKNOWN_ERROR.getMessage());
+            } catch (BusinessLogicException e){
+                request.setAttribute("exception", e.getExceptionCode().getStatus());
+        }
+
+        catch (Exception e) {
+                log.error("================================================");
+                log.error("JwtFilter - doFilterInternal() 오류발생");
+                log.error("token : {}", token);
+                log.error("Exception Message : {}", e.getMessage());
+                log.error("Exception StackTrace : {");
+                e.printStackTrace();
+                log.error("}");
+                log.error("================================================");
+               request.setAttribute("exception", e.getMessage());
+          }
         //토큰 유효성 검사
         chain.doFilter(wrappedRequest, response);
     }
@@ -74,5 +79,5 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             return authorizationHeader.substring(JwtConstants.TOKEN_HEADER_PREFIX.length());
         }
         return null;
-    }
-}
+    //}
+}}

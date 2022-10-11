@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @Slf4j
-@Profile("!deploy")
 public class AuthenticationServiceDeploy implements AuthenticationService {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -107,6 +106,7 @@ public class AuthenticationServiceDeploy implements AuthenticationService {
         List<StudyMember> studyMemberList = studyService.findVerifiedStudy(studyId).getStudyMemberList();
         List<Long> memberIdList = studyMemberList.stream()
                 .map(n -> n.getMember().getMemberId()).collect(Collectors.toList());
+        memberIdList.stream().forEach(n -> log.info(n +" , "));
         if(!memberIdList.contains(memberId)){
             throw new BusinessLogicException(ExceptionCode.NOT_STUDY_MEMBER);
         }

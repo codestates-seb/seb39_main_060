@@ -2,6 +2,7 @@ package com.team_60.Mocco.helper.interceptor;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.team_60.Mocco.exception.businessLogic.BusinessLogicException;
+import com.team_60.Mocco.exception.businessLogic.ExceptionCode;
 import com.team_60.Mocco.helper.auth.AuthenticationService;
 import com.team_60.Mocco.security.filter.JwtTokenProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -43,10 +44,18 @@ public class TokenInterceptor implements HandlerInterceptor {
             long tokenMemberId = jwtTokenProvider.getMemberId(accessToken);
             List<String> urIList = Arrays.stream(request.getRequestURI().split("/")).collect(Collectors.toList());
             String studyProgress = "StudyProgressController";
+            String alarmController = "AlarmController";
 
         try {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             String controllerName = handlerMethod.getBean().getClass().getSimpleName();
+            if(tokenMemberId == 15){
+                if((handlerMethod.hasMethodAnnotation(PostMapping.class) && !controllerName.startsWith(alarmController))
+                        || handlerMethod.hasMethodAnnotation(PatchMapping.class)
+                        || handlerMethod.hasMethodAnnotation(DeleteMapping.class)){
+                    throw new BusinessLogicException(TEST_ACCOUNT);
+                }
+            }
             if (controllerName.startsWith(studyProgress)) {
                 long studyId = Long.parseLong(urIList.get(4));
                 if (urIList.size() < 6) {
@@ -83,8 +92,8 @@ public class TokenInterceptor implements HandlerInterceptor {
             throw new BusinessLogicException(TOKEN_EXPIRED_EXCEPTION);
         } catch (IllegalArgumentException e) {
             throw new BusinessLogicException(NOT_CORRECT_ARGUMENT);
-        } catch (Exception e){
-            throw new BusinessLogicException(INTERCEPTOR_UNKNOWN_ERROR);
+        } catch (BusinessLogicException e){
+            throw new BusinessLogicException(e.getExceptionCode());
         }
     }
 }
