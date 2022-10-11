@@ -12,7 +12,6 @@ import WithdrawalModal from '../components/PageComponent/ModifyUser/WithdrawalMo
 function ModifyUser() {
   const [userInfo, setUserInfo] = useRecoilState(userInfoState);
 
-  const [loadingCheckNickname, setLoadingCheckNickname] = useState(false);
   const [nicknameValue, setNicknameValue] = useState('');
   const [nicknameChecked, setNicknameChecked] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -81,18 +80,15 @@ function ModifyUser() {
   };
 
   const onClick = () => {
-    setLoadingCheckNickname(true);
     request({
       method: 'get',
       url: '/api/register/nickname-check',
       params: { nickname: nicknameValue },
     })
       .then(() => setNicknameChecked(true))
-      .catch((error) => setErrorMessage(error.response.data.message))
-      .finally(() => {
-        setLoadingCheckNickname(false);
-      });
+      .catch((error) => setErrorMessage(error.response.data.message));
   };
+
   return (
     <div
       css={css`
@@ -129,17 +125,23 @@ function ModifyUser() {
             name="nickname"
             onChange={onChangeNickname}
           />
-          <ModifyUserButton
-            buttonText={nicknameChecked ? '✔' : '중복확인'}
-            type="button"
-            onClick={onClick}
-            disabled={nicknameChecked || loadingCheckNickname}
-            css={css`
-              margin-top: 33px;
-              min-width: 40px;
-              margin-left: 8px;
-            `}
-          />
+          <div>
+            <ModifyUserButton
+              text={nicknameChecked ? '✔' : '중복확인'}
+              type="button"
+              onClick={onClick}
+              disabled={nicknameChecked}
+              css={css`
+                margin-top: 33px;
+                min-width: 40px;
+                margin-left: 8px;
+                &:disabled {
+                  color: #ffffff;
+                  background-color: #0b6ff2;
+                }
+              `}
+            />
+          </div>
         </div>
 
         {errorMessage && (
@@ -172,7 +174,7 @@ function ModifyUser() {
           name="location"
         />
         <ModifyUserButton
-          buttonText="비밀번호 변경하기"
+          text="비밀번호 변경하기"
           type="button"
           onClick={openChangePasswordModal}
         />
@@ -201,7 +203,7 @@ function ModifyUser() {
           )}
         </div>
         <ModifyUserButton
-          buttonText="이미지 업로드 하기"
+          text="이미지 업로드 하기"
           type="button"
           onClick={onUploadImageButtonClick}
         />
@@ -230,10 +232,11 @@ function ModifyUser() {
           defaultValue={userInfo?.githubRepositoryList[2]}
           name="githubRepository3"
         />
-        <ModifyUserButton buttonText="프로필 설정 완료" type="submit" />
+        <ModifyUserButton text="프로필 설정 완료" type="submit" />
       </form>
       <ModifyUserButton
-        buttonText="회원 탈퇴"
+        variant="secondary"
+        text="회원 탈퇴"
         type="button"
         onClick={openWithdrawalModal}
       />

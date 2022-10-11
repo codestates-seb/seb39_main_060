@@ -1,57 +1,48 @@
 import { css } from '@emotion/react';
 
-function ModifyUserButton({ buttonText, ...rest }) {
+function ModifyUserButton({ variant = 'primary', text, ...rest }) {
   return (
-    <div>
-      <button
-        css={
-          buttonText === '회원 탈퇴' ? negativeButtonStyle : positiveButtonStyle
+    <button
+      css={css`
+        width: 100%;
+        height: 40px;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: normal;
+        box-sizing: border-box;
+        margin-top: 12px;
+        margin-bottom: 30px;
+        border: none;
+        color: #ffffff;
+        ${variant === 'primary' &&
+        css`
+          border: 1px solid #0b6ff2;
+          background-color: #0b6ff2;
+          &:hover:not(:disabled) {
+            color: #0b6ff2;
+            background-color: #ffffff;
+          }
+        `}
+        ${variant === 'secondary' &&
+        css`
+          border: 1px solid #999999;
+          background-color: #999999;
+          &:hover:not(:disabled) {
+            color: #999999;
+            background-color: #ffffff;
+          }
+        `}
+        &:disabled {
+          background-color: #999999;
+          border: none;
+          cursor: not-allowed;
         }
-        {...rest}
-      >
-        {buttonText}
-      </button>
-    </div>
+      `}
+      {...rest}
+    >
+      {text}
+    </button>
   );
 }
-
-const positiveButtonStyle = css`
-  width: 100%;
-  height: 40px;
-  color: #ffffff;
-  background-color: #0b6ff2;
-  border-radius: 5px;
-  border-width: 0px;
-  margin-top: 12px;
-  margin-bottom: 30px;
-  font-size: 18px;
-  font-weight: normal;
-  border: 1px solid #0b6ff2;
-  &:disabled {
-    background-color: #999999;
-  }
-  &:hover {
-    color: #0b6ff2;
-    background-color: #ffffff;
-  }
-`;
-
-const negativeButtonStyle = css`
-  width: 100%;
-  height: 40px;
-  color: #ffffff;
-  background-color: #999999;
-  border-radius: 5px;
-  border-width: 0px;
-  margin-top: 12px;
-  margin-bottom: 30px;
-  font-size: 18px;
-  font-weight: normal;
-  border: 1px solid #999999;
-  &:hover {
-    color: #999999;
-    background-color: #ffffff;
-  }
-`;
 
 export default ModifyUserButton;
