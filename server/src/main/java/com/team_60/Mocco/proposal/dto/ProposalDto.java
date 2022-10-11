@@ -22,8 +22,8 @@ public class ProposalDto {
         @Positive(message = "스터디 식별자는 1 이상이어야 합니다.")
         private long studyId;
 
-        @Size(max = 300, message = "신청글은 최대 30자입니다.")
-        @NotNull(message = "대댓글은 null이 아니어야 합니다.")
+        @Size(max = 30, message = "신청글은 최대 30자입니다.")
+        @NotNull(message = "신청글은 null이 아니어야 합니다.")
         private String content;
     }
 

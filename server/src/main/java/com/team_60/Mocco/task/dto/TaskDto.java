@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.team_60.Mocco.task_check.dto.TaskCheckDto;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,7 +17,7 @@ public class TaskDto {
     @NotBlank(message = "Task의 내용은 빈칸일 수 없습니다.")
     private String content;
 
-    @Past(message = "Task 마감 날짜는 오늘 날짜보다 이전이어야 합니다.")
+    @Future(message = "Task 마감 날짜는 오늘 날짜보다 이후이어야 합니다.")
     @NotBlank(message = "Task 마감 날짜는 빈칸일 수 없습니다.")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate deadline;
