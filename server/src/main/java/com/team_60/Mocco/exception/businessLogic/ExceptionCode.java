@@ -50,6 +50,7 @@ public enum ExceptionCode {
     FAIL_SSE_CONNECT(500 ,"서버에서 구독이 정상적으로 작동하지 않았습니다."),
     NOT_ACCEPTED_EXTENSION(400, "이미지은 jpg, png 파일만 업로드 할 수 있습니다."),
     BAD_REQUEST(400,"잘못된 요청입니다."),
+    TEST_ACCOUNT(403,"테스트 유저는 접근할 수 없습니다."),
     
     USERNAME_NOT_FOUND(401,"해당하는 유저를 찾을 수 없습니다."),
     CLAIM_NOT_EXIST(403,"권한 정보가 없는 토큰입니다."),
