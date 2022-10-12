@@ -99,7 +99,7 @@ function Notice({ handleNoticeClose }) {
         </div>
         <div css={ButtonContainer}>
           <Button
-            text={'알겠습니다!'}
+            text={'하루동안 닫기'}
             type={'long_blue'}
             onClick={handleNoticeClose}
           />
