@@ -5,6 +5,7 @@ import com.team_60.Mocco.exception.businessLogic.BusinessLogicException;
 import com.team_60.Mocco.exception.businessLogic.ExceptionCode;
 import com.team_60.Mocco.member.dto.MemberDto;
 import com.team_60.Mocco.member.entity.Member;
+import com.team_60.Mocco.member.entity.MyInfo;
 import com.team_60.Mocco.member.mapper.MemberMapper;
 import com.team_60.Mocco.member.repository.MemberRepository;
 import com.team_60.Mocco.security.dto.SecurityDto;
@@ -44,6 +45,7 @@ public class SecurityService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final MemberMapper mapper;
     private final RedisTemplate redisTemplate;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public ResponseEntity login(SecurityDto.Login login, HttpServletResponse response) throws IOException {
 
@@ -131,22 +133,48 @@ public class SecurityService {
     }
 
     public ResponseEntity githubLogin(Member member, HttpServletResponse response) throws IOException {
-        Member findMember = memberRepository.findByProviderId(member.getProviderId())
-                .orElseThrow(()->{throw new BusinessLogicException(MEMBER_NOT_FOUND);});
-        if(!findMember.getGithubNickname().equals(member.getGithubNickname())){
-            findMember.setGithubNickname(member.getGithubNickname());
-            memberRepository.save(findMember);
+
+        HttpStatus httpStatus = HttpStatus.OK;
+        Member findMember = memberRepository.findByProviderId(member.getProviderId()).orElse(null);
+        if (findMember != null){
+            if(!findMember.getGithubNickname().equals(member.getGithubNickname())){
+                findMember.setGithubNickname(member.getGithubNickname());
+                memberRepository.save(findMember);
+            }
+        } else {
+            httpStatus = HttpStatus.CREATED;
+            findMember = createNewMemberByGithubAccount(member);
         }
-        PrincipalDetails principal = new PrincipalDetails(findMember);
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(principal, principal.getPassword());
-        Map<String, Object> tokenInfo = jwtTokenProvider.generateToken(authenticationToken,response);
-        redisTemplate.opsForValue()
-                .set("RefreshToken:"+authenticationToken.getName(),tokenInfo.get(REFRESH_TOKEN_HEADER), REFRESH_TOKEN_EXP, TimeUnit.MILLISECONDS);
 
+        createJWT(findMember, response);
         MemberDto.Response responseDto = mapper.memberToMemberResponseDto(findMember);
-
-        return new ResponseEntity(new SingleResponseDto<>(responseDto), HttpStatus.OK);
+        return new ResponseEntity(new SingleResponseDto<>(responseDto), httpStatus);
     }
 
+    private void createJWT(Member member, HttpServletResponse response) throws IOException {
+        PrincipalDetails principal = new PrincipalDetails(member);
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(principal, principal.getPassword());
+        Map<String, Object> tokenInfo = jwtTokenProvider.generateToken(authenticationToken, response);
+        redisTemplate.opsForValue()
+                .set("RefreshToken:"+authenticationToken.getName(),tokenInfo.get(REFRESH_TOKEN_HEADER), REFRESH_TOKEN_EXP, TimeUnit.MILLISECONDS);
+    }
+
+    private Member createNewMemberByGithubAccount(Member member) {
+        Member createMember = new Member();
+
+        createMember.getMyInfo().setMember(createMember);
+        createMember.setProviderId(member.getProviderId());
+        createMember.setProvider(member.getProvider());
+        createMember.setGithubNickname(member.getGithubNickname());
+        createMember.setEmail("");
+
+        Long randomPassword = (long) (Math.random() * 1000000000);
+        createMember.setPassword(passwordEncoder.encode(randomPassword.toString()));
+
+        String nickname = "Github" + (int) ((Math.random() * (9999 - 1000)) + 1000);
+        createMember.setNickname(nickname);
+
+        return memberRepository.save(createMember);
+    }
 }
