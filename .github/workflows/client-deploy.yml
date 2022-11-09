@@ -1,0 +1,45 @@
+name: client-deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+defaults:
+  run:
+    working-directory: ./client # workflow에서 default working directory
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # 인스턴스 OS
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3 # 워크플로에서 액세스할 수 있도록 에서 저장소를 체크아웃
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: uninstall react-scripts
+        run: npm uninstall react-scripts
+
+      - name: reinstall react-scripts
+        run: npm install --save react-scripts@4.0.3
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: S3 Deploy
+        run: aws s3 sync ./build s3://team60-main-bucket
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-northeast-2
