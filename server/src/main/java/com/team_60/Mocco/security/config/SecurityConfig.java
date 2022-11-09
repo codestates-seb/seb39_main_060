@@ -49,11 +49,6 @@ public class SecurityConfig {
                 .and()
                 .formLogin().disable()
                 .httpBasic().disable()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.GET).permitAll()
-                .antMatchers("/api/alarm/unsubscribe").permitAll()
-                .anyRequest().hasRole("USER")
-                .and()
                 .addFilterBefore(new JwtAuthenticationFilter(redisTemplate,jwtTokenProvider),UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login()
                 .redirectionEndpoint()
@@ -67,6 +62,11 @@ public class SecurityConfig {
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint());
+//                .and()
+//                .authorizeRequests()
+//                .antMatchers(HttpMethod.GET).permitAll()
+//                .antMatchers("/api/alarm/unsubscribe").permitAll()
+//                .anyRequest().access("hasRole('ROLE_USER')")
 
         return http.build();
     }

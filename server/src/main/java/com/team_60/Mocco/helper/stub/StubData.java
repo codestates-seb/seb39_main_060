@@ -4,6 +4,7 @@ import com.team_60.Mocco.member.entity.Member;
 import com.team_60.Mocco.study.dto.StudyDto;
 import lombok.Getter;
 import java.time.LocalDate;
+import java.util.List;
 @Getter
 public class StubData {
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { userInfoState, preventAuthenticatedState } from './atom/atom';
@@ -21,10 +21,31 @@ import GithubOauthCallback from './pages/GithubOauthCallback';
 import { css } from '@emotion/react';
 import Footer from './components/Common/Footer';
 import NotFound from './pages/NotFound';
+import Notice from './components/PageComponent/Landing/Notice';
 
 function App() {
   const authenticated = useRecoilValue(userInfoState);
   const preventAuthenticated = useRecoilValue(preventAuthenticatedState);
+  const [isNoticeOn, setIsNoticeOn] = useState(null);
+
+  useEffect(() => {
+    const localNoticeKV = JSON.parse(localStorage.getItem('notice'));
+    if (!localNoticeKV) {
+      setIsNoticeOn(true);
+    } else if (
+      localNoticeKV.off === true &&
+      Date.now() >= localNoticeKV.expire
+    ) {
+      setIsNoticeOn(true);
+    } else if (
+      localNoticeKV.off === true &&
+      Date.now() < localNoticeKV.expire
+    ) {
+      setIsNoticeOn(false);
+    } else {
+      setIsNoticeOn(false);
+    }
+  }, []);
 
   const isAuth = useMemo(() => {
     if (!authenticated && preventAuthenticated) {
@@ -32,6 +53,16 @@ function App() {
     }
     return authenticated;
   }, [authenticated]);
+
+  // 공지사항 핸들러
+  const handleNoticeClose = () => {
+    const obj = {
+      off: true,
+      expire: Date.now() + 86400000,
+    };
+    localStorage.setItem('notice', JSON.stringify(obj));
+    setIsNoticeOn(false);
+  };
 
   return (
     <div
@@ -79,6 +110,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
+      {isNoticeOn ? <Notice handleNoticeClose={handleNoticeClose} /> : null}
     </div>
   );
 }

@@ -153,7 +153,7 @@ function WithdrawalModal({ onClose }) {
             onChange={onChange}
           />
           <div>
-            <ModifyUserButton buttonText="탈퇴하기" disabled={disabled} />
+            <ModifyUserButton text="탈퇴하기" disabled={disabled} />
           </div>
         </form>
       )}
